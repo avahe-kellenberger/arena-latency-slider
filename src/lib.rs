@@ -20,6 +20,8 @@ static mut CURRENT_ARENA_ID: String = String::new();
 static mut CURRENT_INPUT_BUFFER: isize = 4;
 static mut MOST_RECENT_AUTO: isize = -1;
 
+static mut SHOW_INPUT_BUFFER: bool = false;
+
 const MAX_INPUT_BUFFER: isize = 25;
 const MIN_INPUT_BUFFER: isize = -1;
 
@@ -36,25 +38,38 @@ unsafe fn non_hdr_update_room_hook(_: &skyline::hooks::InlineCtx) {
             CURRENT_INPUT_BUFFER -= 1;
         }
         CURRENT_COUNTER = (CURRENT_COUNTER + 1) % 10;
-    } else {
-        CURRENT_COUNTER = 0;
+    } else if ninput::any::is_press(ninput::Buttons::UP) {
+        SHOW_INPUT_BUFFER = true;
+    } else if ninput::any::is_press(ninput::Buttons::DOWN) {
+        SHOW_INPUT_BUFFER = false;
     }
 
     CURRENT_INPUT_BUFFER = CURRENT_INPUT_BUFFER.clamp(MIN_INPUT_BUFFER, MAX_INPUT_BUFFER);
-    if CURRENT_INPUT_BUFFER == -1 {
-        if MOST_RECENT_AUTO == -1 {
-            set_text_string(
-                CURRENT_PANE_HANDLE as u64,
-                format!("ROOM ID: {}\nInput Latency: Auto\0", CURRENT_ARENA_ID).as_ptr(),
-            );
+
+    if SHOW_INPUT_BUFFER {
+        if CURRENT_INPUT_BUFFER == -1 {
+            if MOST_RECENT_AUTO == -1 {
+                set_text_string(
+                    CURRENT_PANE_HANDLE as u64,
+                    format!("ID: {}\nInput Latency: Auto\0", CURRENT_ARENA_ID).as_ptr(),
+                );
+            } else {
+                set_text_string(
+                    CURRENT_PANE_HANDLE as u64,
+                    format!("ID: {}\nInput Latency: Auto ({})\0", CURRENT_ARENA_ID, MOST_RECENT_AUTO).as_ptr()
+                )
+            }
         } else {
             set_text_string(
                 CURRENT_PANE_HANDLE as u64,
-                format!("ROOM ID: {}\nInput Latency: Auto ({})\0", CURRENT_ARENA_ID, MOST_RECENT_AUTO).as_ptr()
-            )
+                format!("ID: {}\nInput Latency: {}\0", CURRENT_ARENA_ID, CURRENT_INPUT_BUFFER).as_ptr()
+            );
         }
     } else {
-        set_text_string(CURRENT_PANE_HANDLE as u64, format!("{}\nInput Latency: {}\0", CURRENT_ARENA_ID, CURRENT_INPUT_BUFFER).as_ptr());
+        set_text_string(
+                CURRENT_PANE_HANDLE as u64,
+                format!("ID: {}", CURRENT_ARENA_ID).as_ptr()
+            );
     }
 }
 
