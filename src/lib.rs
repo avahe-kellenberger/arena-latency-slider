@@ -20,7 +20,7 @@ static mut CURRENT_ARENA_ID: String = String::new();
 static mut CURRENT_INPUT_BUFFER: isize = 4;
 static mut MOST_RECENT_AUTO: isize = -1;
 
-static mut SHOW_INPUT_BUFFER: bool = false;
+static mut SHOW_INPUT_BUFFER: bool = true;
 
 const MAX_INPUT_BUFFER: isize = 25;
 const MIN_INPUT_BUFFER: isize = -1;
@@ -28,12 +28,12 @@ const MIN_INPUT_BUFFER: isize = -1;
 #[skyline::hook(offset = 0x1887700, inline)]
 unsafe fn non_hdr_update_room_hook(_: &skyline::hooks::InlineCtx) {
     static mut CURRENT_COUNTER: usize = 0;
-    if ninput::any::is_press(ninput::Buttons::RIGHT) {
+    if ninput::any::is_press(ninput::Buttons::ZR) {
         if CURRENT_COUNTER == 0 {
             CURRENT_INPUT_BUFFER += 1;
         }
         CURRENT_COUNTER = (CURRENT_COUNTER + 1) % 10;
-    } else if ninput::any::is_press(ninput::Buttons::LEFT) {
+    } else if ninput::any::is_press(ninput::Buttons::L) {
         if CURRENT_COUNTER == 0 {
             CURRENT_INPUT_BUFFER -= 1;
         }
